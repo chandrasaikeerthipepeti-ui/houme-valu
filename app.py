@@ -4,7 +4,7 @@ import pandas as pd
 from flask import Flask, render_template, request
 
 ROOT = Path(__file__).resolve().parent
-bundle = joblib.load(ROOT / "models" / "house_price_model.joblib")
+bundle = joblib.load(ROOT / "house_price_model.joblib")
 model, model_columns = bundle["model"], bundle["columns"]
 cities = sorted(bundle["cities"])
 
