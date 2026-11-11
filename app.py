@@ -8,7 +8,7 @@ bundle = joblib.load(ROOT / "house_price_model.joblib")
 model, model_columns = bundle["model"], bundle["columns"]
 cities = sorted(bundle["cities"])
 
-app = Flask(__name__)
+app = Flask(__name__,template_folder=".",static_folder=".",static_url_path="/static")
 
 def predict_price(form):
     row = pd.DataFrame([{
