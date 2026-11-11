@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HomeValue | India House Price Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="/"><span class="brand-mark">⌂</span> Home<span>Value</span></a>
+  <div class="nav-links"><a href="/">Predict</a><a href="/about">About the model</a></div>
+</nav>
+<main class="shell">
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="dot"></span> MACHINE LEARNING · INDIA</div>
+      <h1>Find the value<br>of your <em>next home.</em></h1>
+      <p>Get an estimated property price from key home details using a machine-learning model trained on a synthetic India-wide dataset.</p>
+      <div class="hero-points"><span>✓ Fast estimate</span><span>✓ 30 Indian cities</span><span>✓ Simple inputs</span></div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="sun"></div><div class="building b1"></div><div class="building b2"></div><div class="building b3"></div>
+      <div class="house"><div class="roof"></div><div class="home-body"><div class="window"></div><div class="door"></div></div></div>
+      <div class="art-label"><span class="label-icon">↗</span><div><b>Smart estimate</b><small>Powered by ML</small></div></div>
+    </div>
+  </section>
+
+  <section class="workspace">
+    <div class="form-card">
+      <div class="section-heading"><div><div class="eyebrow">PROPERTY DETAILS</div><h2>Tell us about the home</h2></div><span class="step">01 / 01</span></div>
+      {% if error %}<div class="error">{{ error }}</div>{% endif %}
+      
+<form method="POST" action="/">
+    <div class="field full">
+        <label>City</label>
+        <select name="city" required>
+            <option value="" disabled selected>Select City</option>
+            {% for city in cities %}
+            <option value="{{ city }}"
+                {% if details and details.city == city %}selected{% endif %}>
+                {{ city }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="field">
+        <label>Built-up area</label>
+        <input type="number" name="area_sqft"
+               placeholder="Enter area in sq. ft."
+               min="250" max="10000"
+               value="{{ details.area_sqft if details else '' }}"
+               required>
+    </div>
+
+    <div class="field">
+        <label>Property age</label>
+        <input type="number" name="property_age"
+               placeholder="Enter property age"
+               min="0" max="100"
+               value="{{ details.property_age if details else '' }}"
+               required>
+    </div>
+
+    <div class="field">
+        <label>Bedrooms</label>
+        <select name="bedrooms" required>
+            <option value="" disabled
+                {% if not details %}selected{% endif %}>
+                Select Bedrooms
+            </option>
+            {% for n in range(1,11) %}
+            <option value="{{ n }}"
+                {% if details and details.bedrooms|int == n %}selected{% endif %}>
+                {{ n }} BHK
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="field">
+        <label>Bathrooms</label>
+        <select name="bathrooms" required>
+            <option value="" disabled
+                {% if not details %}selected{% endif %}>
+                Select Bathrooms
+            </option>
+            {% for n in range(1,11) %}
+            <option value="{{ n }}"
+                {% if details and details.bathrooms|int == n %}selected{% endif %}>
+                {{ n }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="field">
+        <label>Furnishing</label>
+        <select name="furnishing" required>
+            <option value="" disabled
+                {% if not details %}selected{% endif %}>
+                Select Furnishing
+            </option>
+            {% for v in ['Unfurnished','Semi-Furnished','Furnished'] %}
+            <option value="{{ v }}"
+                {% if details and details.furnishing == v %}selected{% endif %}>
+                {{ v }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="field">
+        <label>Locality type</label>
+        <select name="locality_type" required>
+            <option value="" disabled
+                {% if not details %}selected{% endif %}>
+                Select Locality Type
+            </option>
+            {% for v in ['Standard','Premium','Developing'] %}
+            <option value="{{ v }}"
+                {% if details and details.locality_type == v %}selected{% endif %}>
+                {{ v }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="field full">
+        <label>Parking spaces</label>
+        <select name="parking" required>
+            <option value="" disabled
+                {% if not details %}selected{% endif %}>
+                Select Parking Spaces
+            </option>
+            {% for n in range(0,6) %}
+            <option value="{{ n }}"
+                {% if details and details.parking|int == n %}selected{% endif %}>
+                {{ n }} spaces
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="submit">
+        Estimate House Price →
+    </button>
+</form>
+
+      <p class="fineprint">For learning and demonstration only. Not a bank valuation or property appraisal.</p>
+    </div>
+
+    <aside class="result-card">
+      {% if prediction is not none %}
+      <div class="result-top"><span class="result-icon">₹</span><span class="result-tag">YOUR ESTIMATE</span></div>
+      <div class="result-caption">Estimated property value</div>
+      <div class="price">₹{{ "{:,.0f}".format(prediction) }}</div>
+      <div class="result-divider"></div>
+      <div class="summary-title">Property summary</div>
+      <div class="summary-row"><span>Location</span><b>{{ details.city }}</b></div>
+      <div class="summary-row"><span>Area</span><b>{{ details.area_sqft }} sq. ft.</b></div>
+      <div class="summary-row"><span>Configuration</span><b>{{ details.bedrooms }} BHK · {{ details.bathrooms }} bath</b></div>
+      <div class="summary-row"><span>Furnishing</span><b>{{ details.furnishing }}</b></div>
+      <div class="summary-row"><span>Locality</span><b>{{ details.locality_type }}</b></div>
+      <div class="result-note">This estimate is generated by a Random Forest regression model. Actual prices vary by neighbourhood, property condition and market conditions.</div>
+      {% else %}
+      <div class="result-placeholder">
+        <div class="placeholder-icon">⌂</div><div class="eyebrow">YOUR RESULT</div>
+        <h3>Your estimate<br>will appear here.</h3>
+        <p>Complete the property details and select “Estimate house price” to see the model's prediction.</p>
+        <div class="mini-stats"><div><b>30</b><span>Cities</span></div><div><b>7k</b><span>Demo records</span></div><div><b>ML</b><span>Regression</span></div></div>
+      </div>
+      {% endif %}
+    </aside>
+  </section>
+  <footer><span>© 2026 HomeValue · Student ML Project</span><span>Built with Python + Scikit-learn</span></footer>
+</main>
+</body></html>
